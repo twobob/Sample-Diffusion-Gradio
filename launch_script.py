@@ -8,7 +8,7 @@ import sys
 # *                                   UTIL                                   *
 # ****************************************************************************
 
-python = sys.executable
+python = '/content/miniconda/bin/python3'
 
 
 def prRed(skk): print(f"\033[91m{skk}\033[00m") 
@@ -86,7 +86,7 @@ aliases = {
 
 prGreen('Starting launch script...')
 
-if __name__ == "__main__":
+if True:
 
     # INSTALL
 
