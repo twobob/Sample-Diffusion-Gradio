@@ -15,7 +15,7 @@ from dance_diffusion.api import RequestHandler, Request, RequestType, SamplerTyp
 # ****************************************************************************
 
 max_audioboxes = 100
-modelfolder = 'D:/DevWkspc/sample-diffusion-gui/models'
+modelfolder = '/content/drive/MyDrive/AI/models'
 
 
 
