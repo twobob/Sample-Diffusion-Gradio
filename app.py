@@ -4,7 +4,7 @@ import torch, torchaudio
 import gc
 
 sys.path.append('sample_diffusion')
-from util.util import load_audio, crop_audio
+from util.util import load_audio
 from util.platform import get_torch_device_type
 from dance_diffusion.api import RequestHandler, Request, RequestType, SamplerType, SchedulerType, ModelType
 
@@ -63,6 +63,25 @@ def variable_outputs(output_amt, mode, interp_amount):
 
     return [gr.Audio.update(visible=True)]*output_amt + [gr.Audio.update(visible=False)]*(max_audioboxes-output_amt)
 
+def cropper(samples: int, randomize: bool = True):
+
+    def crop(source: torch.Tensor, offset_in: int = None) -> torch.Tensor:
+        n_channels, n_samples = source.shape
+
+        offset = 0
+        if (offset_in):
+            offset = min(offset_in, n_samples - samples)
+        elif (randomize):
+            offset = torch.randint(0, max(0, n_samples - samples) + 1, []).item()
+
+        chunk = source.new_zeros([n_channels, samples])
+        chunk [:, :min(n_samples, samples)] = source[:, offset:offset + samples]
+
+        return chunk
+
+    return crop
+
+
 refresh_symbol = '\U0001f504'
 
 class ToolButton(gr.Button, gr.components.FormComponent):
@@ -115,39 +134,7 @@ def generate_audio(batch_size, model, mode,use_autocast, use_autocrop, device_ac
 
     request_handler = RequestHandler(device_accelerator, device_offload, optimize_memory_use=False, use_autocast=use_autocast)
     seed = int(seed) if(seed!=-1) else torch.randint(0, 4294967294, [1], device=device_type_accelerator).item()
-    autocrop = crop_audio(int(chunk_size), True) if(use_autocrop==True) else lambda audio: audio
-
-    #def cropper(samples: int, randomize: bool = True):
-
-    #def crop(source: torch.Tensor, offset_in: int = None) -> torch.Tensor:
-    #    n_channels, n_samples = source.shape
-    #    
-    #    offset = 0
-    #    if (offset_in):
-    #        offset = min(offset_in, n_samples - samples)
-    #    elif (randomize):
-    #        offset = torch.randint(0, max(0, n_samples - samples) + 1, []).item()
-    #    
-    #    chunk = source.new_zeros([n_channels, samples])
-    #    chunk [:, :min(n_samples, samples)] = source[:, offset:offset + samples]
-    #   
-    #    return chunk
-    #
-    #return crop
-    
-    #def crop_audio(source: torch.Tensor, chunk_size: int, crop_offset: int = 0) -> torch.Tensor:
-    #n_channels, n_samples = source.shape
-    #
-    #offset = 0
-    #if (crop_offset > 0):
-    #    offset = min(crop_offset, n_samples - chunk_size)
-    #elif (crop_offset == -1):
-    #    offset = torch.randint(0, max(0, n_samples - chunk_size) + 1, []).item()
-    #
-    #chunk = source.new_zeros([n_channels, chunk_size])
-    #chunk [:, :min(n_samples, chunk_size)] = source[:, offset:offset + chunk_size]
-    # 
-    #return chunk
+    autocrop = cropper(int(chunk_size), True) if(use_autocrop==True) else lambda audio: audio
     
     # make request
     request = Request(
