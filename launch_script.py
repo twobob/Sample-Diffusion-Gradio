@@ -111,6 +111,9 @@ if True:
                     
         if not os.path.exists('sample_diffusion'):
             run(f'git clone https://github.com/sudosilico/sample-diffusion sample_diffusion', "Cloning sample-diffusion repo.", "Couldn't clone sample-diffusion repo", live=True)
+            os.chdir('sample_diffusion')
+            run(f'git reset --hard eb83b2b01b')
+            os.chdir('../')
 
     # LAUNCH
     run('/content/miniconda/envs/venv/bin/python3 /content/Sample-Diffusion-Gradio/app.py', "Starting main script..", "Couldn't start main script!", live=True)
