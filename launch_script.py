@@ -107,6 +107,9 @@ if __name__ == "__main__":
                     
         if not os.path.exists('sample_diffusion'):
             run(f'git clone https://github.com/sudosilico/sample-diffusion sample_diffusion', "Cloning sample-diffusion repo.", "Couldn't clone sample-diffusion repo", live=True)
-
+            os.chdir('sample_diffusion')
+            run(f'git reset --hard ff1a02751f') 
+            os.chdir('../')
+            
     # LAUNCH
     run(f'"{python}" -m {main_script_path}', "Starting main script..", "Couldn't start main script!", live=True)
